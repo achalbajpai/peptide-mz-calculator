@@ -81,7 +81,7 @@ protobuf==5.29.4
     # via streamlit
 psutil==7.0.0
     # via src (pyproject.toml)
-pyarrow==19.0.1
+pyarrow==20.0.0
     # via streamlit
 pydeck==0.9.1
     # via streamlit
