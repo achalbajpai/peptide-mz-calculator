@@ -1,5 +1,5 @@
 {
-    "app-name": "OpenMS Peptide m/z Calculator",
+    "app-name": "OpenMS Calculator",
     "app-description": "A Streamlit app for calculating Peptide m/z values.",
     "github-user": "OpenMS",
     "version": "0.0.1",
