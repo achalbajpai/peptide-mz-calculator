@@ -1,7 +1,8 @@
 {
-    "app-name": "OpenMS WebApp Template",
+    "app-name": "OpenMS Calculator",
+    "app-description": "A Streamlit app for calculating Peptide m/z values.",
     "github-user": "OpenMS",
-    "version": "1.0.2",
+    "version": "0.0.1",
     "repository-name": "streamlit-template",
     "analytics": {
         "google-analytics": {
