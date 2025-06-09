@@ -13,7 +13,6 @@ if __name__ == '__main__':
         str(st.session_state.settings["app-name"]) : [
             st.Page(Path("content", "quickstart.py"), title="Quickstart", icon="👋"),
             st.Page(Path("content", "docs.py"), title="Documentation", icon="📖"),
-            st.Page(Path("content", "calculator.py"), title="Calculator", icon="🧮"),
             st.Page(Path("content", "visualization.py"), title="Visualization", icon="📊"),
         ]
     }
