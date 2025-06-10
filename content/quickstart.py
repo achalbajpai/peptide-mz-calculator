@@ -328,5 +328,5 @@ with st.expander("ℹ️ About this Calculator"):
     
     **References:**
     - pyOpenMS Documentation: https://pyopenms.readthedocs.io/
-    - OpenMS : https://www.openms.de/
+    - OpenMS Website : https://www.openms.de/
     """)
