@@ -32,7 +32,7 @@ class Config:
     MAX_CHARGE = 10
     MIN_CHARGE = 1
     DEFAULT_SEQUENCE = "PEPTIDE"
-    VALID_AMINO_ACIDS = "ARNDCEQGHILKMFPSTWYV"
+    VALID_AMINO_ACIDS = "ARNDCEQGHILKMFPSTWYV X U"  
 
 @st.cache_data(ttl=3600)  
 def cached_modifications():
@@ -80,11 +80,11 @@ This calculator determines the mass-to-charge (m/z) ratio of peptides based on t
 charge state, and modifications. It uses the pyOpenMS library for accurate mass spectrometry calculations.
 
 **How to use:**
-1. Enter your peptide sequence using single-letter amino acid codes.
-2. Add any modifications using brackets or UNIMOD notation if needed.
-3. Specify the charge by adding / followed by the number (e.g., /2 for +2 charge).
-4. Modifications and charge are auto-detected and update relevant fields.
-5. Click "Calculate m/z" to get the result.
+1.  **Enter Sequence:** Type your peptide sequence (e.g., `PEPTIDE`).
+2.  **Add Modifications (Optional):** Include modifications in brackets (e.g., `M[Oxidation]`, `C[+57.021464]`) or UNIMOD notation (e.g., `C[UNIMOD:4]`).
+3.  **Specify Charge (Optional):** Add a slash and the charge number to your sequence (e.g., `PEPTIDE/2`).
+4.  **Auto-Detect:** Modifications and charge are automatically recognized.
+5.  **Calculate:** Click "Calculate m/z".
 """)
 
 # info ( most of it will be moved to documentation later on, kept it for now as it was useful during development )
