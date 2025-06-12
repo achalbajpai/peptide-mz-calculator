@@ -470,7 +470,7 @@ def parse_sequence_with_mods_and_charge(sequence: str) -> Tuple[str, str, int]:
 def detect_modification_from_sequence(sequence: str) -> str:
     """
     Detect the primary modification type from a peptide sequence.
-    Uses efficient pattern matching to avoid excessive ModificationsDB calls.
+    Uses ModificationsDB for accurate mass delta matching.
     """
     if not re.search(r'[\[\(]', sequence):
         return "None"
@@ -483,7 +483,7 @@ def detect_modification_from_sequence(sequence: str) -> str:
     if clean_sequence == openms_sequence:
         return "None"
 
-    # Pattern matching for common modifications
+    # Pattern matching for common modifications (converted to OpenMS format)
     modification_patterns = {
         r'\(Oxidation\)': "Oxidation (M)",
         r'\(Carbamidomethyl\)': "Carbamidomethyl (C)", 
@@ -496,6 +496,68 @@ def detect_modification_from_sequence(sequence: str) -> str:
     for pattern, dropdown_name in modification_patterns.items():
         if re.search(pattern, openms_sequence):
             return dropdown_name
+    
+    # Check for mass deltas using ModificationsDB
+    mass_delta_match = re.search(r'\[([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\]', openms_sequence)
+    if mass_delta_match:
+        try:
+            mass_delta = float(mass_delta_match.group(1))
+            detected_mod = _match_mass_delta_to_modification(mass_delta)
+            if detected_mod != "None":
+                return detected_mod
+        except ValueError:
+            pass
+    
+    return "None"
+
+
+def _match_mass_delta_to_modification(mass_delta: float, tolerance: float = 0.01) -> str:
+    """
+    Match a mass delta to a known modification using ModificationsDB.
+    """
+    try:
+        mod_db = _get_pyopenms_mod_db()
+        poms = _get_pyopenms()
+        
+        # modification names and their known mass deltas
+        known_mods = {
+            "Carbamidomethyl (C)": [57.021464, 57.0214, 57.02, 57.0],
+            "Oxidation (M)": [15.994915, 15.9949, 15.99, 16.0],
+            "Phosphorylation (S/T/Y)": [79.966331, 79.9663, 79.97, 80.0],
+            "Acetylation (N-term)": [42.010565, 42.0106, 42.01, 42.0],
+            "Methylation (K/R)": [14.015650, 14.0157, 14.02, 14.0],
+            "Deamidation (N/Q)": [0.984016, 0.9840, 0.98, 1.0]
+        }
+        
+        # directly check known modifications first
+        for mod_name, masses in known_mods.items():
+            for known_mass in masses:
+                if abs(mass_delta - known_mass) <= tolerance:
+                    return mod_name
+        
+        # if not found, check ModificationsDB
+        mod_id_to_dropdown = {
+            "Oxidation": "Oxidation (M)",
+            "Carbamidomethyl": "Carbamidomethyl (C)",
+            "Phospho": "Phosphorylation (S/T/Y)",
+            "Acetyl": "Acetylation (N-term)",
+            "Methyl": "Methylation (K/R)",
+            "Deamidated": "Deamidation (N/Q)"
+        }
+        
+        for mod_id in mod_id_to_dropdown.keys():
+            try:
+                mod = mod_db.getModification(mod_id)
+                mod_mass = mod.getDiffMonoMass()
+                
+                if abs(mass_delta - mod_mass) <= tolerance:
+                    return mod_id_to_dropdown[mod_id]
+                    
+            except Exception:
+                continue
+                
+    except Exception:
+        pass
     
     return "None"
 
