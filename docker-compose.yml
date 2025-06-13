@@ -7,13 +7,13 @@ services:
       dockerfile: Dockerfile
       args:
         GITHUB_TOKEN: $GITHUB_TOKEN
-    image: openms_streamlit_template
-    container_name: openms-streamlit-template
+    image: mzcalculator
+    container_name: mzcalculator
     restart: always
     ports:
       - 8501:8501
     volumes:
-      - workspaces-streamlit-template:/workspaces-streamlit-template
-    command: streamlit run openms-streamlit-template/app.py
+      - workspaces-mzcalculator:/workspaces-mzcalculator
+    command: streamlit run peptide-mz-calculator/app.py
 volumes:
-  workspaces-streamlit-template:
+  workspaces-mzcalculator:
