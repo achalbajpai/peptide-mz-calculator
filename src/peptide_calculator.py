@@ -10,14 +10,24 @@ from dataclasses import dataclass
 import re
 
 def _get_pyopenms():
-    """Lazy import of pyOpenMS to avoid loading issues."""
+    """Lazy import of pyOpenMS to avoid loading issues.
+
+    Returns:
+        module: The pyopenms module.
+
+    """
     import pyopenms as poms
     return poms
 
 _mod_db_cache = None
 
 def _get_pyopenms_mod_db():
-    """Lazy import and cached initialization of pyOpenMS ModificationsDB."""
+    """Lazy import and cached initialization of pyOpenMS ModificationsDB.
+
+    Returns:
+        ModificationsDB: The cached ModificationsDB instance.
+
+    """
     global _mod_db_cache
     if _mod_db_cache is None:
         poms = _get_pyopenms()
@@ -46,8 +56,16 @@ class SequenceAnalysis:
 
 
 def parse_square_bracket_modifications(sequence: str) -> Tuple[str, str]:
-    """
-    Parse peptide sequence with square bracket modifications and convert to pyOpenMS format.
+    """Parse peptide sequence with square bracket modifications and convert to pyOpenMS format.
+
+    Args:
+        sequence (str): The peptide sequence containing square bracket modifications.
+
+    Returns:
+        Tuple[str, str]: A tuple containing (clean_sequence, modified_sequence).
+            clean_sequence is the sequence without modifications.
+            modified_sequence is the sequence converted to pyOpenMS format.
+
     """
     poms = _get_pyopenms()
     mod_db = _get_pyopenms_mod_db()
@@ -58,7 +76,15 @@ def parse_square_bracket_modifications(sequence: str) -> Tuple[str, str]:
         sequence = sequence[1:]
     
     def convert_modification(mod_text):
-        """Convert modification text to OpenMS format using ModificationsDB."""
+        """Convert modification text to OpenMS format using ModificationsDB.
+
+        Args:
+            mod_text (str): The modification text to convert.
+
+        Returns:
+            str: The converted modification in OpenMS format.
+
+        """
         mod_text = mod_text.strip()
         
         # Check if it's a numeric mass delta (ProForma arbitrary mass shift)
@@ -137,8 +163,18 @@ def parse_square_bracket_modifications(sequence: str) -> Tuple[str, str]:
 
 
 def validate_peptide_sequence_with_mods(sequence: str) -> Tuple[bool, str, str, int]:
-    """
-    Validate peptide sequence that may contain modifications and charge notation.
+    """Validate peptide sequence that may contain modifications and charge notation.
+
+    Args:
+        sequence (str): The peptide sequence to validate.
+
+    Returns:
+        Tuple[bool, str, str, int]: A tuple containing (is_valid, clean_sequence, openms_sequence, charge_state).
+            is_valid indicates if the sequence is valid.
+            clean_sequence is the sequence without modifications.
+            openms_sequence is the OpenMS-formatted sequence.
+            charge_state is the detected charge state.
+
     """
     try:
         clean_sequence, openms_sequence, charge_state = parse_sequence_with_mods_and_charge(sequence)
@@ -152,7 +188,17 @@ def validate_peptide_sequence_with_mods(sequence: str) -> Tuple[bool, str, str, 
 
 
 def validate_peptide_sequence(sequence: str) -> tuple[bool, str]:
-    """Validate peptide sequence contains only valid amino acids."""
+    """Validate peptide sequence contains only valid amino acids.
+
+    Args:
+        sequence (str): The peptide sequence to validate.
+
+    Returns:
+        tuple[bool, str]: A tuple containing (is_valid, clean_sequence).
+            is_valid indicates if the sequence contains only valid amino acids.
+            clean_sequence is the sequence without modifications.
+
+    """
     try:
         clean_sequence, _ = parse_square_bracket_modifications(sequence)
         
@@ -177,7 +223,16 @@ def validate_peptide_sequence(sequence: str) -> tuple[bool, str]:
 
 
 def apply_modification(sequence: str, modification: str) -> str:
-    """Apply the selected modification to the peptide sequence."""
+    """Apply the selected modification to the peptide sequence.
+
+    Args:
+        sequence (str): The peptide sequence to modify.
+        modification (str): The modification to apply (e.g., "Oxidation (M)", "None").
+
+    Returns:
+        str: The modified sequence in OpenMS format.
+
+    """
     if modification == "None":
         return sequence
 
@@ -214,14 +269,31 @@ def apply_modification(sequence: str, modification: str) -> str:
 
 
 def calculate_peptide_mz(sequence: str, charge_state: int, modification: str = "None") -> Dict[str, Any]:
-    """
-    Calculate the m/z ratio and related properties for a peptide.
-    
+    """Calculate the m/z ratio and related properties for a peptide.
+
     Args:
-        sequence: The peptide sequence. Can contain modifications in square brackets
-                 and/or charge notation (e.g., "PEPTIDE/2", "M[Oxidation]PEPTIDE/3")
-        charge_state: The charge state - will be overridden if charge notation is found
-        modification: Additional modification to apply from dropdown
+        sequence (str): The peptide sequence. Can contain modifications in square brackets
+                       and/or charge notation (e.g., "PEPTIDE/2", "M[Oxidation]PEPTIDE/3").
+        charge_state (int): The charge state - will be overridden if charge notation is found.
+        modification (str): Additional modification to apply from dropdown. Defaults to "None".
+
+    Returns:
+        Dict[str, Any]: A dictionary containing calculation results including:
+            - mz_ratio: The calculated m/z ratio
+            - monoisotopic_mass: The monoisotopic mass in Da
+            - molecular_formula: The molecular formula
+            - original_sequence: The clean amino acid sequence
+            - modified_sequence: The sequence with modifications
+            - charge_state: The final charge state used
+            - charge_source: Where the charge state came from
+            - modification: The applied modification
+            - sequence_length: Length of the sequence
+            - aa_composition: Amino acid composition dictionary
+            - success: Boolean indicating successful calculation
+
+    Raises:
+        ValueError: If sequence is empty, charge state is invalid, or sequence contains invalid characters.
+
     """
     if not sequence.strip():
         raise ValueError("Peptide sequence cannot be empty")
@@ -311,7 +383,12 @@ def calculate_peptide_mz(sequence: str, charge_state: int, modification: str = "
 
 
 def get_supported_modifications() -> list:
-    """Get a list of supported peptide modifications."""
+    """Get a list of supported peptide modifications.
+
+    Returns:
+        list: A list of supported modification names including "None".
+
+    """
     common_modifications = [
         "None",
         "Oxidation (M)",
@@ -326,7 +403,13 @@ def get_supported_modifications() -> list:
 
 
 def get_modification_info() -> Dict[str, str]:
-    """Get detailed information about supported modifications."""
+    """Get detailed information about supported modifications.
+
+    Returns:
+        Dict[str, str]: A dictionary mapping modification names to their detailed descriptions
+                       including mass delta and target information.
+
+    """
     poms = _get_pyopenms()
     mod_db = _get_pyopenms_mod_db()
     info_dict = {"None": "No modification applied"}
@@ -383,7 +466,12 @@ def get_modification_info() -> Dict[str, str]:
 
 
 def get_square_bracket_examples() -> Dict[str, str]:
-    """Get examples of square bracket modification notation and charge notation."""
+    """Get examples of square bracket modification notation and charge notation.
+
+    Returns:
+        Dict[str, str]: A dictionary mapping example sequences to their descriptions.
+
+    """
     return {
         "M[Oxidation]PEPTIDE": "Methionine oxidation at position 1",
         "PEPTIDEC[Carbamidomethyl]": "Carbamidomethylated cysteine at C-terminus", 
@@ -415,7 +503,15 @@ def get_square_bracket_examples() -> Dict[str, str]:
 
 
 def validate_openms_sequence(sequence: str) -> bool:
-    """Validate if a sequence string is compatible with pyOpenMS AASequence."""
+    """Validate if a sequence string is compatible with pyOpenMS AASequence.
+
+    Args:
+        sequence (str): The sequence string to validate.
+
+    Returns:
+        bool: True if the sequence is compatible with pyOpenMS, False otherwise.
+
+    """
     try:
         poms = _get_pyopenms()
         poms.AASequence.fromString(sequence)
@@ -425,9 +521,18 @@ def validate_openms_sequence(sequence: str) -> bool:
 
 
 def parse_charge_notation(sequence: str) -> Tuple[str, int]:
-    """
-    Parse peptide sequence with charge notation and extract charge state.
+    """Parse peptide sequence with charge notation and extract charge state.
+
     Supports both /charge and trailing number formats.
+
+    Args:
+        sequence (str): The peptide sequence that may contain charge notation.
+
+    Returns:
+        Tuple[str, int]: A tuple containing (sequence_without_charge, charge_state).
+            sequence_without_charge is the sequence with charge notation removed.
+            charge_state is the extracted charge state (1 if none found).
+
     """
     sequence = sequence.strip()
     
@@ -460,7 +565,18 @@ def parse_charge_notation(sequence: str) -> Tuple[str, int]:
 
 
 def parse_sequence_with_mods_and_charge(sequence: str) -> Tuple[str, str, int]:
-    """Parse peptide sequence with both modifications and charge notation."""
+    """Parse peptide sequence with both modifications and charge notation.
+
+    Args:
+        sequence (str): The peptide sequence containing modifications and/or charge notation.
+
+    Returns:
+        Tuple[str, str, int]: A tuple containing (clean_sequence, modified_sequence, charge_state).
+            clean_sequence is the sequence without modifications.
+            modified_sequence is the OpenMS-formatted sequence.
+            charge_state is the extracted charge state.
+
+    """
     sequence_no_charge, charge_state = parse_charge_notation(sequence)
     clean_sequence, modified_sequence = parse_square_bracket_modifications(sequence_no_charge)
     
@@ -468,9 +584,16 @@ def parse_sequence_with_mods_and_charge(sequence: str) -> Tuple[str, str, int]:
 
 
 def detect_modification_from_sequence(sequence: str) -> str:
-    """
-    Detect the primary modification type from a peptide sequence.
+    """Detect the primary modification type from a peptide sequence.
+
     Uses ModificationsDB for accurate mass delta matching.
+
+    Args:
+        sequence (str): The peptide sequence to analyze for modifications.
+
+    Returns:
+        str: The detected modification name matching dropdown options, or "None" if no modification detected.
+
     """
     if not re.search(r'[\[\(]', sequence):
         return "None"
@@ -512,8 +635,15 @@ def detect_modification_from_sequence(sequence: str) -> str:
 
 
 def _match_mass_delta_to_modification(mass_delta: float, tolerance: float = 0.01) -> str:
-    """
-    Match a mass delta to a known modification using ModificationsDB.
+    """Match a mass delta to a known modification using ModificationsDB.
+
+    Args:
+        mass_delta (float): The mass delta to match against known modifications.
+        tolerance (float): Mass tolerance in Da for matching. Defaults to 0.01.
+
+    Returns:
+        str: The dropdown modification name if found, "None" otherwise.
+
     """
     try:
         mod_db = _get_pyopenms_mod_db()
@@ -563,8 +693,17 @@ def _match_mass_delta_to_modification(mass_delta: float, tolerance: float = 0.01
 
 
 def parse_proforma_sequence(sequence: str) -> Tuple[str, str, bool]:
-    """
-    Parse ProForma-style sequence, trying direct PyOpenMS parsing first.
+    """Parse ProForma-style sequence, trying direct PyOpenMS parsing first.
+
+    Args:
+        sequence (str): The ProForma-style peptide sequence to parse.
+
+    Returns:
+        Tuple[str, str, bool]: A tuple containing (clean_sequence, converted_sequence, proforma_direct).
+            clean_sequence is the sequence without modifications.
+            converted_sequence is the converted or original sequence.
+            proforma_direct indicates if direct PyOpenMS parsing was successful.
+
     """
     sequence = sequence.strip()
     if sequence.startswith('.'):
@@ -587,7 +726,22 @@ def parse_proforma_sequence(sequence: str) -> Tuple[str, str, bool]:
 
 
 def analyze_peptide_sequence(sequence: str) -> SequenceAnalysis:
-    """Unified sequence analysis function that detects modifications and charge state."""
+    """Unified sequence analysis function that detects modifications and charge state.
+
+    Args:
+        sequence (str): The peptide sequence to analyze.
+
+    Returns:
+        SequenceAnalysis: A dataclass containing analysis results including:
+            - modification: Detected modification name
+            - modification_detected: Boolean indicating if modification was found
+            - charge: Detected or default charge state
+            - charge_detected: Boolean indicating if charge was found in sequence
+            - is_valid: Boolean indicating if sequence is valid
+            - clean_sequence: The sequence without modifications
+            - error_message: Error message if validation failed
+
+    """
     analysis = SequenceAnalysis()
     
     if not sequence or not sequence.strip():
@@ -624,10 +778,20 @@ def analyze_peptide_sequence(sequence: str) -> SequenceAnalysis:
 
 
 def get_cached_modifications():
-    """Get supported modifications list for caching"""
+    """Get supported modifications list for caching.
+
+    Returns:
+        list: A list of supported modification names from get_supported_modifications().
+
+    """
     return get_supported_modifications()
 
 
 def get_cached_examples():
-    """Get square bracket examples for caching"""
+    """Get square bracket examples for caching.
+
+    Returns:
+        Dict[str, str]: A dictionary of example sequences and descriptions from get_square_bracket_examples().
+
+    """
     return get_square_bracket_examples()
