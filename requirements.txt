@@ -75,7 +75,7 @@ pillow==11.1.0
     #   captcha
     #   matplotlib
     #   streamlit
-plotly==5.22.0
+plotly==6.2.0
     # via src (pyproject.toml)
 protobuf==5.29.4
     # via streamlit
