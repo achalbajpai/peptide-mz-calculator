@@ -161,7 +161,16 @@ jobs:
 
     - name: Test Windows
       shell: bash
-      run: ctest --output-on-failure -V -S $GITHUB_WORKSPACE/OpenMS/tools/ci/citest.cmake
+      run: |
+        export OPENMS_DATA_PATH="${{ github.workspace }}/OpenMS/share/OpenMS"
+        export PATH="${{ github.workspace }}/OpenMS/bld/bin:$PATH"
+        
+        # Set Windows-specific environment variables for better test stability
+        export OPENMS_DISABLE_UPDATE_CHECK=1
+        export OPENMS_DISABLE_PROGRESS_BAR=1
+        
+        # Run tests with proper Windows configuration
+        ctest --output-on-failure -V -S $GITHUB_WORKSPACE/OpenMS/tools/ci/citest.cmake
       env:
           SOURCE_DIRECTORY: "${{ github.workspace }}/OpenMS"
           CI_PROVIDER: "GitHub-Actions"
